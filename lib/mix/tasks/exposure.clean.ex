@@ -1,13 +1,15 @@
 defmodule Mix.Tasks.Exposure.Clean do
+  @shortdoc "Regenerates snapshot files and removes unused"
+
   @moduledoc """
-  TODO(Gordon) - Add this
+  Regenerates snapshot files for all snapshot tests and removes unused snapshot
+  files.
   """
 
   use Mix.Task
 
   @preferred_cli_env :test
   @recursive true
-  @shortdoc "Deletes unused snapshot files and recreates others"
 
   ################################
   # Mix.Task Callbacks
@@ -18,6 +20,6 @@ defmodule Mix.Tasks.Exposure.Clean do
   @spec run([binary()]) :: term()
   def run(_) do
     Enum.each(Exposure.snapshot_paths(), &File.rm_rf!/1)
-    Mix.Tasks.Exposure.Update.run([])
+    Mix.Tasks.Exposure.Generate.run([])
   end
 end
