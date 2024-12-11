@@ -24,3 +24,9 @@ exposure-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+# Ignore Elixir Language Server files
+.elixir_ls
+
+# Dialyzer generated PLT files
+/dialyzer

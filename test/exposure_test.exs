@@ -35,12 +35,12 @@ defmodule ExposureTest do
     end
   end
 
-  describe "handle_snapshot/2" do
+  describe "handle_snapshot!/2" do
     test "will raise an error if result doesn't match snapshot" do
       refute System.get_env("EXPOSURE_OVERRIDE", "false") == "true"
 
       assert_raise ExUnit.AssertionError, fn ->
-        handle_snapshot("incorrect value", __ENV__)
+        handle_snapshot!("incorrect value", __ENV__)
       end
     end
 
@@ -48,7 +48,7 @@ defmodule ExposureTest do
       refute System.get_env("EXPOSURE_OVERRIDE", "false") == "true"
 
       assert_raise RuntimeError, fn ->
-        handle_snapshot("correct value", __ENV__)
+        handle_snapshot!("correct value", __ENV__)
       end
     end
   end

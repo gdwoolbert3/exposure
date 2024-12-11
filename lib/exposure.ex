@@ -1,9 +1,11 @@
 defmodule Exposure do
   @moduledoc """
-  TODO(Gordon) - Add this
+  `Exposure` adds support for snapshot testing to Elixir projects.
+
+  For more information, see [Usage](README.md#usage).
   """
 
-  alias Inspect.Algebra
+  @dialyzer {:no_match, maybe_add_default_path: 1}
 
   @inspect_opts %Inspect.Opts{
     printable_limit: :infinity,
@@ -20,14 +22,14 @@ defmodule Exposure do
   ################################
 
   @doc false
-  @spec handle_snapshot(term(), Macro.Env.t()) :: :ok
-  def handle_snapshot(value, env) do
+  @spec handle_snapshot!(term(), Macro.Env.t()) :: :ok
+  def handle_snapshot!(value, env) do
     {function_name, _} = env.function
     snapshot_file = snapshot_file!(env.file, function_name)
 
     cond do
-      override?() ->
-        create_snapshot(snapshot_file, value)
+      System.get_env("EXPOSURE_OVERRIDE") == "true" ->
+        create_snapshot!(snapshot_file, value)
 
       File.exists?(snapshot_file) ->
         compare_snapshot!(snapshot_file, value)
@@ -35,7 +37,7 @@ defmodule Exposure do
       true ->
         raise RuntimeError, """
         No snapshot for test: "#{function_name}"
-        Generate a snapshot with "mix exposure.update #{env.file}:#{env.line}".
+        Generate a snapshot with "mix exposure.generate #{env.file}:#{env.line}".
         """
     end
   end
@@ -51,7 +53,17 @@ defmodule Exposure do
   def snapshot_test_tag, do: @snapshot_test_tag
 
   @doc """
-  TODO(Gordon) - add this
+  Defines a snapshot test.
+
+  ## Examples
+
+  ```elixir
+  describe "my_fun/2" do
+    test_snapshot "works as expected" do
+      my_fun("foo", 123)
+    end
+  end
+  ```
   """
   @spec test_snapshot(binary(), keyword()) :: Macro.t()
   defmacro test_snapshot(name, opts) do
@@ -60,13 +72,23 @@ defmodule Exposure do
     quote do
       @tag unquote(@snapshot_test_tag)
       test unquote(name) do
-        handle_snapshot(unquote(expr), __ENV__)
+        handle_snapshot!(unquote(expr), __ENV__)
       end
     end
   end
 
   @doc """
-  TODO(Gordon) - add this
+  Defines a snapshot test that utilizes context.
+
+  ## Examples
+
+  ```elixir
+  describe "my_fun/3" do
+    test_snapshot "works as expected", ctx do
+      my_fun("foo", 123, ctx)
+    end
+  end
+  ```
   """
   @spec test_snapshot(binary(), Macro.t(), keyword()) :: Macro.t()
   defmacro test_snapshot(name, context, opts) do
@@ -75,7 +97,7 @@ defmodule Exposure do
     quote do
       @tag unquote(@snapshot_test_tag)
       test unquote(name), unquote(context) do
-        handle_snapshot(unquote(expr), __ENV__)
+        handle_snapshot!(unquote(expr), __ENV__)
       end
     end
   end
@@ -109,8 +131,10 @@ defmodule Exposure do
   defp snapshot_file_basename(function) do
     function
     |> to_string()
-    |> String.replace([" ", "/", "."], "_")
-    |> Kernel.<>(".exs")
+    |> String.downcase()
+    |> String.replace(~r/[^a-z0-9\s-]/u, "  ")
+    |> String.replace(~r/[\s-]+/, "_")
+    |> Kernel.<>(".snap")
   end
 
   defp test_paths do
@@ -119,48 +143,46 @@ defmodule Exposure do
     ArgumentError ->
       paths =
         @test_paths
-        |> maybe_add_test_path()
+        |> maybe_add_default_path()
         |> Enum.map(&Path.expand/1)
         |> Enum.sort()
-        |> Enum.reduce([], &maybe_update_paths/2)
+        |> Enum.reduce([], &maybe_add_test_path/2)
 
       :persistent_term.put({__MODULE__, :test_paths}, paths)
       paths
   end
 
-  defp maybe_add_test_path(paths) do
+  defp maybe_add_default_path([]) do
     if File.dir?("test") do
-      ["test" | paths]
+      ["test"]
     else
-      paths
+      []
     end
   end
 
-  defp maybe_update_paths(path, []), do: [path]
+  defp maybe_add_default_path(paths), do: paths
 
-  defp maybe_update_paths(path, [last | _] = paths) do
-    if String.starts_with?(path, last) do
+  defp maybe_add_test_path(path, []), do: [path]
+
+  defp maybe_add_test_path(path, [last | _] = paths) do
+    if String.starts_with?(path, last <> "/") do
       paths
     else
       [path | paths]
     end
   end
 
-  defp override? do
-    System.get_env("EXPOSURE_OVERRIDE", "false") == "true"
-  end
-
-  defp create_snapshot(file, value) do
+  defp create_snapshot!(file, value) do
     file
     |> Path.dirname()
     |> File.mkdir_p!()
 
     snapshot =
       value
-      |> Algebra.to_doc(@inspect_opts)
-      |> Algebra.group()
-      |> Algebra.concat(Algebra.line())
-      |> Algebra.format(80)
+      |> Inspect.Algebra.to_doc(@inspect_opts)
+      |> Inspect.Algebra.group()
+      |> Inspect.Algebra.concat(Inspect.Algebra.line())
+      |> Inspect.Algebra.format(80)
 
     File.write!(file, snapshot)
   end
