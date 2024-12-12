@@ -1,1 +1,1 @@
-%{context: :new, exposure: true}
+%{context: :new, snapshot: true}

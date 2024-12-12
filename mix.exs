@@ -21,12 +21,11 @@ defmodule Exposure.MixProject do
       description: description(),
       dialyzer: dialyzer(),
       docs: docs(),
-      elixir: "~> 1.17",
+      elixir: "~> 1.16",
       name: "Exposure",
       package: package(),
       preferred_cli_env: preferred_cli_env(),
       start_permanent: Mix.env() == :prod,
-      test_coverage: test_coverage(),
       version: @version
     ]
   end
@@ -90,15 +89,6 @@ defmodule Exposure.MixProject do
   defp preferred_cli_env do
     [
       ci: :test
-    ]
-  end
-
-  defp test_coverage do
-    [
-      ignore_modules: [
-        Mix.Tasks.Exposure.Clean,
-        Mix.Tasks.Exposure.Generate
-      ]
     ]
   end
 end

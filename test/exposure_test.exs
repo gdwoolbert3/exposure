@@ -31,7 +31,7 @@ defmodule ExposureTest do
     test_snapshot "compares result to snapshot", ctx do
       %{context: :old}
       |> Map.merge(ctx)
-      |> Map.take([:context, :exposure])
+      |> Map.take([:context, :snapshot])
     end
   end
 
@@ -44,10 +44,12 @@ defmodule ExposureTest do
       end
     end
 
-    test "will raise an error if test doesn't have a snapshot" do
+    test "will raise an error if test doesn't have a snapshot", ctx do
+      message = "No snapshot for test: \"#{ctx.test}\"."
+
       refute System.get_env("EXPOSURE_OVERRIDE", "false") == "true"
 
-      assert_raise RuntimeError, fn ->
+      assert_raise RuntimeError, message, fn ->
         handle_snapshot!("correct value", __ENV__)
       end
     end

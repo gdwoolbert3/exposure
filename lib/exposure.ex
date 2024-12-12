@@ -14,7 +14,7 @@ defmodule Exposure do
   }
 
   @snapshot_directory Application.compile_env(:exposure, :snapshot_directory, "_snapshots")
-  @snapshot_test_tag Application.compile_env(:exposure, :snapshot_test_tag, :exposure)
+  @snapshot_test_tag Application.compile_env(:exposure, :snapshot_test_tag, :snapshot)
   @test_paths Keyword.get(Mix.Project.config(), :test_paths, [])
 
   ################################
@@ -35,22 +35,9 @@ defmodule Exposure do
         compare_snapshot!(snapshot_file, value)
 
       true ->
-        raise RuntimeError, """
-        No snapshot for test: "#{function_name}"
-        Generate a snapshot with "mix exposure.generate #{env.file}:#{env.line}".
-        """
+        raise RuntimeError, "No snapshot for test: \"#{function_name}\"."
     end
   end
-
-  @doc false
-  @spec snapshot_paths :: [binary()]
-  def snapshot_paths do
-    Enum.map(test_paths(), &Path.join(&1, @snapshot_directory))
-  end
-
-  @doc false
-  @spec snapshot_test_tag :: atom()
-  def snapshot_test_tag, do: @snapshot_test_tag
 
   @doc """
   Defines a snapshot test.
@@ -78,7 +65,7 @@ defmodule Exposure do
   end
 
   @doc """
-  Defines a snapshot test that utilizes context.
+  Defines a snapshot test that utilizes the test context.
 
   ## Examples
 
