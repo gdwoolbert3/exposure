@@ -82,13 +82,13 @@ defmodule MyApp.MixProject do
 
   def project do
     [
-      aliases: ["snapshot.generate": &generate_snapshot/1],
-      preferred_cli_env: ["snapshot.generate": :test],
+      aliases: ["snapshots.generate": &generate_snapshots/1],
+      preferred_cli_env: ["snapshots.generate": :test],
       ...
     ]
   end
 
-  defp generate_snapshot(args) do
+  defp generate_snapshots(args) do
     System.put_env("EXPOSURE_OVERRIDE", "true")
     args = ["--only", "snapshot"] ++ args
     Mix.Tasks.Test.run(args)
