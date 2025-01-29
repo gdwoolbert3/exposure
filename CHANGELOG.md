@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.0] - 2024-12-07
+## [1.0.0] - 2025-01-29
 
 ### Changed
 
@@ -10,5 +10,5 @@ All notable changes to this project will be documented in this file.
 
 ### Links
 
-* TODO(Gordon) - add github link
-* TODO(Gordon) - add hexdocs link
+* [GitHub](https://github.com/exposure/gen_batcher/releases/tag/v1.0.0)
+* [HexDocs](https://hexdocs.pm/exposure/1.0.0/readme.html)
