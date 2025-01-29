@@ -10,5 +10,5 @@ All notable changes to this project will be documented in this file.
 
 ### Links
 
-* [GitHub](https://github.com/exposure/gen_batcher/releases/tag/v1.0.0)
+* [GitHub](https://github.com/gdwoolbert3/exposure/releases/tag/v1.0.0)
 * [HexDocs](https://hexdocs.pm/exposure/1.0.0/readme.html)
