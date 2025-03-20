@@ -3,6 +3,8 @@ defmodule Exposure do
   `Exposure` adds support for snapshot testing to Elixir projects.
 
   For more information, see [Usage](README.md#usage).
+
+  TODO(Gordon) - update dialyzer CI cache
   """
 
   @dialyzer {:no_match, maybe_add_default_path: 1}

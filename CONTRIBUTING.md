@@ -48,8 +48,7 @@ mix test
 
 ## Outstanding Tasks
 
-* Investigate generating a short summary after custom mix tasks.
-* Investigate givi9ng control over snapshot file names.
+* Investigate giving control over snapshot file names.
 
 ## Code of Conduct
 
