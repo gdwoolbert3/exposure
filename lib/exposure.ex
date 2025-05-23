@@ -15,7 +15,6 @@ defmodule Exposure do
 
   @snapshot_directory Application.compile_env(:exposure, :snapshot_directory, "_snapshots")
   @snapshot_test_tag Application.compile_env(:exposure, :snapshot_test_tag, :snapshot)
-  @test_paths Keyword.get(Mix.Project.config(), :test_paths, [])
 
   ################################
   # Public API
@@ -125,18 +124,31 @@ defmodule Exposure do
   end
 
   defp test_paths do
-    :persistent_term.get({__MODULE__, :test_paths})
-  rescue
-    ArgumentError ->
-      paths =
-        @test_paths
-        |> maybe_add_default_path()
-        |> Enum.map(&Path.expand/1)
-        |> Enum.sort()
-        |> Enum.reduce([], &maybe_add_test_path/2)
+    key = {__MODULE__, Mix.Project.get!(), :test_paths}
 
-      :persistent_term.put({__MODULE__, :test_paths}, paths)
-      paths
+    case fetch_test_paths(key) do
+      {:ok, paths} -> paths
+      :error -> put_test_paths(key)
+    end
+  end
+
+  defp fetch_test_paths(key) do
+    {:ok, :persistent_term.get(key)}
+  rescue
+    ArgumentError -> :error
+  end
+
+  defp put_test_paths(key) do
+    paths =
+      Mix.Project.config()
+      |> Keyword.get(:test_paths, [])
+      |> maybe_add_default_path()
+      |> Enum.map(&Path.expand/1)
+      |> Enum.sort()
+      |> Enum.reduce([], &maybe_add_test_path/2)
+
+    :persistent_term.put(key, paths)
+    paths
   end
 
   defp maybe_add_default_path([]) do

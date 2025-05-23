@@ -1,7 +1,7 @@
 defmodule Exposure.MixProject do
   use Mix.Project
 
-  @version "1.0.0"
+  @version "1.1.0"
 
   ################################
   # Public API
@@ -21,7 +21,7 @@ defmodule Exposure.MixProject do
       description: description(),
       dialyzer: dialyzer(),
       docs: docs(),
-      elixir: "~> 1.16",
+      elixir: "~> 1.18",
       name: "Exposure",
       package: package(),
       preferred_cli_env: preferred_cli_env(),
