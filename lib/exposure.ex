@@ -128,14 +128,14 @@ defmodule Exposure do
 
     case fetch_test_paths(key) do
       {:ok, paths} -> paths
-      _ -> put_test_paths(key)
+      :error -> put_test_paths(key)
     end
   end
 
   defp fetch_test_paths(key) do
     {:ok, :persistent_term.get(key)}
   rescue
-    _ -> :error
+    ArgumentError -> :error
   end
 
   defp put_test_paths(key) do
