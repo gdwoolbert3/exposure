@@ -13,7 +13,7 @@ in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:exposure, "~> 1.0.0", only: [:dev, :test]}
+    {:exposure, "~> 1.1.0", only: [:dev, :test]}
   ]
 end
 ```
