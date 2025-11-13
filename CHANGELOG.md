@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.1] - 2025-11-13
+
+### Changed
+
+* Fetch snapshot directory configuration at runtime
+
+### Links
+
+* [GitHub](https://github.com/gdwoolbert3/exposure/releases/tag/v1.1.1)
+* [HexDocs](https://hexdocs.pm/exposure/1.1.1/readme.html)
+
 ## [1.1.0] - 2025-05-23
 
 ### Changed
