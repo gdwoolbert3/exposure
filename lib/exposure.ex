@@ -5,6 +5,8 @@ defmodule Exposure do
   For more information, see [Usage](README.md#usage).
   """
 
+  require Record
+
   @dialyzer {:no_match, maybe_add_default_path: 1}
 
   @inspect_opts %Inspect.Opts{
@@ -13,8 +15,11 @@ defmodule Exposure do
     pretty: true
   }
 
-  @snapshot_directory Application.compile_env(:exposure, :snapshot_directory, "_snapshots")
+  @default_snapshot_directory "_snapshots"
   @snapshot_test_tag Application.compile_env(:exposure, :snapshot_test_tag, :snapshot)
+
+  # Define a private record for Application test config
+  Record.defrecordp(:app_test_config, test_paths: [], snapshot_directory: "")
 
   ################################
   # Public API
@@ -93,10 +98,11 @@ defmodule Exposure do
   ################################
 
   defp snapshot_file!(file, function) do
+    config = get_app_test_config(Mix.Project.get!())
     basename = snapshot_file_basename(function)
-    test_paths = test_paths()
 
-    test_paths
+    config
+    |> app_test_config(:test_paths)
     |> Enum.find(&String.starts_with?(file, &1))
     |> case do
       path when is_binary(path) ->
@@ -105,7 +111,8 @@ defmodule Exposure do
           |> Path.rootname()
           |> String.trim_leading(path)
 
-        Path.join([path, @snapshot_directory, sub_path, basename])
+        snapshot_directory = app_test_config(config, :snapshot_directory)
+        Path.join([path, snapshot_directory, sub_path, basename])
 
       _ ->
         raise RuntimeError, """
@@ -123,32 +130,27 @@ defmodule Exposure do
     |> Kernel.<>(".snap")
   end
 
-  defp test_paths do
-    key = {__MODULE__, Mix.Project.get!(), :test_paths}
-
-    case fetch_test_paths(key) do
-      {:ok, paths} -> paths
-      :error -> put_test_paths(key)
-    end
-  end
-
-  defp fetch_test_paths(key) do
-    {:ok, :persistent_term.get(key)}
+  defp get_app_test_config(app) do
+    :persistent_term.get({__MODULE__, app, :app_test_config})
   rescue
-    ArgumentError -> :error
+    ArgumentError ->
+      config =
+        app_test_config(
+          test_paths: test_paths(),
+          snapshot_directory: snapshot_directory()
+        )
+
+      :persistent_term.put({__MODULE__, app, :app_test_config}, config)
+      config
   end
 
-  defp put_test_paths(key) do
-    paths =
-      Mix.Project.config()
-      |> Keyword.get(:test_paths, [])
-      |> maybe_add_default_path()
-      |> Enum.map(&Path.expand/1)
-      |> Enum.sort()
-      |> Enum.reduce([], &maybe_add_test_path/2)
-
-    :persistent_term.put(key, paths)
-    paths
+  defp test_paths do
+    Mix.Project.config()
+    |> Keyword.get(:test_paths, [])
+    |> maybe_add_default_path()
+    |> Enum.map(&Path.expand/1)
+    |> Enum.sort()
+    |> Enum.reduce([], &maybe_add_test_path/2)
   end
 
   defp maybe_add_default_path([]) do
@@ -169,6 +171,14 @@ defmodule Exposure do
     else
       [path | paths]
     end
+  end
+
+  defp snapshot_directory do
+    Application.get_env(
+      :exposure,
+      :snapshot_directory,
+      @default_snapshot_directory
+    )
   end
 
   defp create_snapshot!(file, value) do

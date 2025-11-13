@@ -13,7 +13,7 @@ in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:exposure, "~> 1.1.0", only: [:dev, :test]}
+    {:exposure, "~> 1.1.1", only: [:dev, :test]}
   ]
 end
 ```
@@ -126,6 +126,12 @@ More specifically, the configuration options are:
 * `:snapshot_test_tag` - An `t:atom/0` denoting the tag that `Exposure` uses
   to differentiate snapshot tests. Defaults to `:snapshot`.
 
+  > #### Warning {: .warning}
+  >
+  > The `:snapshot_test_tag` configuration option must be available at
+  > **compile** time. If it's set in `config/runtime.exs`, it will not be
+  > respected.
+
 ### Test Paths
 
 `Exposure` can also be used for projects with non-traditional test paths. For
@@ -164,7 +170,7 @@ The `Exposure` API is heavily inspired by the
 majority of cases, `Snapshy` is more than sufficient. The main differences are
 relatively niche:
 
-* `Exposure` has explicit support for additional test paths.
+* `Exposure` has explicit support for additional test paths and umbrella apps.
 
 * `Exposure` has slightly different naming rules for snapshot files.
 
